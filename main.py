@@ -4,12 +4,13 @@ from aiogram import Bot, Dispatcher, F
 from aiogram.filters import Command
 from aiogram.types import Message
 
+# Твой токен
 TOKEN = '8684676356:AAFn3L9uhbGqHymJzanCFmTvDnBVWZKklLQ'
 
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
 
-# Твои списки
+# --- БАЗА ЗНАНИЙ ШАМИЛЯ ---
 jokes = [
     "🎭 ЗНАЕШЬ КАКОЕ САМОЕ ЛОХОНУТОЕ СОЗДАНИЕ? ВЕРНО, ТЫ!",
     "🎭 Представь если бы ты был в моей иллюзии, то как бы я с тобой относился? ПРАВИЛЬНО, КАК К МАРИОНЕТКЕ! ХАХАХА",
@@ -28,7 +29,7 @@ insult_replies = [
 
 magic_answers = ["Да.", "Нет.", "Маловероятно.", "Возможно.", "Ха! Ты серьезно ждешь от меня правды?"]
 
-# --- ОБРАБОТЧИКИ ---
+# --- ЛОГИКА ---
 
 @dp.message(Command("start"))
 async def start(message: Message):
@@ -38,12 +39,20 @@ async def start(message: Message):
 async def joke(message: Message):
     await message.answer(random.choice(jokes))
 
-# Реакция на мат (стоит ПЕРЕД остальными текстовыми сообщениями)
+# Инструмент для поиска ID стикеров
+@dp.message(Command("getsticker"))
+async def start_sticker_mode(message: Message):
+    await message.answer("🎭 Пришли мне стикер, и я покажу его ID.")
+
+@dp.message(F.sticker)
+async def get_sticker_id(message: Message):
+    await message.answer(f"🎭 ID стикера: `{message.sticker.file_id}`", parse_mode="Markdown")
+
+# Фильтры на мат и вопросы
 @dp.message(F.text.lower().contains(tuple(bad_words)))
 async def handle_bad_words(message: Message):
     await message.answer(random.choice(insult_replies))
 
-# Реакция на вопрос с именем
 @dp.message(F.text.lower().contains("шамиль") & F.text.contains("?"))
 async def handle_shamil_question(message: Message):
     await message.answer(random.choice(magic_answers))
@@ -53,4 +62,5 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+    
     
