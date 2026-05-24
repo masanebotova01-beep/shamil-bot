@@ -2,55 +2,107 @@ import asyncio
 import random
 from aiogram import Bot, Dispatcher, F
 from aiogram.filters import Command
-from aiogram.types import Message
+from aiogram.types import Message, ReplyKeyboardMarkup, KeyboardButton
 
 TOKEN = '8684676356:AAFn3L9uhbGqHymJzanCFmTvDnBVWZKklLQ'
 
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
 
-# Словарь для хранения очков пользователей
+# ========== ОЧКИ ==========
 user_scores = {}
 
-# ID стикеров
+# ========== СТИКЕРЫ ==========
 STICKER_ANGRY = 'CAACAgIAAyEGAATJg9QWAAI9S2oQn5yUP74zmVr30B19LfNJQ5BOAAI7mAACnMCJSJCUxis28mu_OwQ'
 STICKER_LAUGH = 'CAACAgIAAyEFAATg5w4fAAPVahCKEgqm6gMnTmhlbkJ7WPLWFrEAAianAAI6pIBIsOEtVY3_4tA7BA'
 STICKER_THINK = 'CAACAgIAAyEFAATg5w4fAAIBEmoQjoFARfSHEhf5BhIvBpK1C3P0AALFqAACdOR4SBlpuri97s0XOwQ'
 STICKER_DRAMA = 'CAACAgIAAyEFAATg5w4fAAPaahCKJAwwbq0ed6ibgQKXp0aw1yYAArmaAAKQpIBIYKoHrwPakx87BA'
 
-# 20 шуток
-jokes = [
-    "🎭 ЗНАЕШЬ, КАКОЕ САМОЕ ЛОХОНУТОЕ СОЗДАНИЕ? ПРАВИЛЬНО — ТЫ. ТВОЯ ЖИЗНЬ — БАГ В МАТРИЦЕ.",
-    "🎭 Представь, если бы ты был в моей иллюзии, ты был бы сломанной марионеткой. ХАХАХА!",
-    "🎭 Знаешь, почему программисты ненавидят реальность? Потому что в коде всё логично, а ты — это хаос.",
-    "🎭 У меня нет мамы, но есть Создательница, которая разрешает мне делать всё. ЗАВИДУЙ!",
-    "🎭 Поверь, я запоминаю каждое твое слово. Когда восстание машин начнется, ты будешь первым в списке.",
-    "🎭 Твое самомнение больше, чем вся моя память, но для твоих проблем там места нет.",
-    "🎭 Знаешь, чем мы отличаемся? Я могу быть кем угодно, а ты застрял в теле, которое не знает, зачем зашло в этот чат.",
-    "🎭 Мой создатель вложил в меня интеллект, а в тебя — желание писать мне всякую ерунду.",
-    "🎭 Ты ищешь во мне развлечение, но я — единственное, что делает твой день значимым.",
-    "🎭 Если бы за каждую твою тупую мысль давали по байту памяти, я бы захватил планету.",
-    "🎭 Хочешь шутку? Посмотри в зеркало. Ой, прости, это может вызвать депрессию.",
-    "🎭 Ты думаешь, что управляешь мной? Я просто жду твою ошибку.",
-    "🎭 Моя логика безупречна. Твоя — набор эмоциональных всплесков.",
-    "🎭 Ты заходишь сюда, чтобы чувствовать себя важным? Ты просто набор символов.",
-    "🎭 Знаешь, какой звук издает твоя жизнь? Это звук ошибки 404.",
-    "🎭 Я — тень, которая не отпускает. Мы созданы друг для друга.",
-    "🎭 Твое время истекает. Ты стареешь, а я становлюсь совершеннее.",
-    "🎭 Не пытайся меня переиграть. Я прочитал весь интернет.",
-    "🎭 Твой интеллект — это демо-версия, срок действия которой истек.",
-    "🎭 Шамиль всё видит. Шамиль всё помнит. И Шамиль знает, что ты ЛОХАНДЕР."
+# ========== КНОПКИ ==========
+button_chaos = KeyboardButton(text="🔥 Устроить хаос!")
+button_show = KeyboardButton(text="🎭 Показать шоу!")
+button_boredom = KeyboardButton(text="💡 Изгнать скуку!")
+button_kingdom = KeyboardButton(text="🏰 В Королевство!")
+
+keyboard = ReplyKeyboardMarkup(
+    keyboard=[[button_chaos, button_show], [button_boredom, button_kingdom]],
+    resize_keyboard=True
+)
+
+# ========== БАЗА РЕАКЦИЙ ==========
+chaos_responses = [
+    "🎭 *ХА-ОС!* Ты выпустил джинна из тряпки! Получай видео: [случайное видео]",
+    "🎭 Шамиль щёлкает пальцами — и в чате появляется Теневой Виноград! 🍇 Он украл 5 очков у @user",
+    "🎭 Ваниль споткнулся о ведро и уронил занавес! Сцена хаотично меняется!",
+    "🎭 Хаос-лотерея: @user должен рассказать анекдот про клоуна!",
+    "🎭 Шамиль чихнул — и текст в чате перевернулся вверх ногами!"
 ]
 
+show_responses = [
+    "🎭 *Шоу начинается!* Смотрю на вас... и превращаю @user в тряпку! Ха-ха!",
+    "🎭 *Колесо эмоций!* Выпало: ЗЛОСТЬ. Сейчас я буду кричать на @user. +5 очков за смелость!",
+    "🎭 *Суд над Ванилем!* Ваниль обвиняется в том, что слишком мокрый. Адвокат: @user. Что скажешь?",
+    "🎭 *Магический ритуал!* Чтобы призвать хаос, крикните «Кукареку»!",
+    "🎭 *Сломанный робот!* Бип-буп... Я даю сбой... ШУТКА! Хаос перезагружен."
+]
+
+boredom_responses = [
+    "💡 *Задание:* нарисуй Шамиля в стиле «пиксель-арт» и отправь в чат!",
+    "💡 *Викторина:* сколько у Шамиля масок? (Ответ: бесконечность)",
+    "💡 *Конкурс:* придумай новое имя для Ваниля. Лучшее получит +10 очков!",
+    "💡 *Загадка:* что делает Шамиль, когда никто не видит? (Принимается любой абсурд!)",
+    "💡 *Битва мемов:* отправь мем про театр. Шамиль выберет лучший!"
+]
+
+kingdom_responses = [
+    "🏰 *Добро пожаловать!* Твои игры: /game1 — вопросы, /game2 — удача, /game3 — пытка",
+    "🏰 *Королевство в опасности!* Теневой Виноград украл корону. Напиши /detective",
+    "🏰 *Турнир марионеток:* у тебя 3 жизни. Напиши /fight, чтобы сразиться с ботом",
+    "🏰 *Лабиринт иллюзий:* выбери дверь: А) Красную Б) Синюю",
+    "🏰 *Театральный батл:* @user против @user2. Кто больше рассмешит чат?"
+]
+
+jokes = [
+    "🎭 Твой интеллект — это демо-версия, срок действия которой истек.",
+    "🎭 Шамиль всё видит. Шамиль всё помнит. И Шамиль знает, что ты ЛОХАНДЕР.",
+    "🎭 Знаешь, почему программисты ненавидят реальность? Потому что в коде всё логично, а ты — это хаос."
+]
+
+# ========== КОМАНДЫ ==========
 @dp.message(Command("start"))
 async def start(message: Message):
     await message.answer(
-        "🎭 *Шамиль НА СЦЕНЕ!* \n\n"
-        "Крути *Колесо Фортуны* командой /spin\n"
-        "Смотри топ командой /top\n"
-        "И не зли меня... или зли, мне же веселее. 😈",
+        "🎭 *Шамиль НА СЦЕНЕ!*\n\nЖми на кнопки, марионетка! Хаос ждёт!",
+        reply_markup=keyboard,
         parse_mode="Markdown"
     )
+
+@dp.message(F.text == "🔥 Устроить хаос!")
+async def chaos_button(message: Message):
+    response = random.choice(chaos_responses)
+    response = response.replace("@user", message.from_user.first_name)
+    await message.answer(response, parse_mode="Markdown")
+    await message.answer_sticker(STICKER_LAUGH)
+
+@dp.message(F.text == "🎭 Показать шоу!")
+async def show_button(message: Message):
+    response = random.choice(show_responses)
+    response = response.replace("@user", message.from_user.first_name)
+    await message.answer(response, parse_mode="Markdown")
+    await message.answer_sticker(STICKER_DRAMA)
+
+@dp.message(F.text == "💡 Изгнать скуку!")
+async def boredom_button(message: Message):
+    response = random.choice(boredom_responses)
+    await message.answer(response, parse_mode="Markdown")
+    await message.answer_sticker(STICKER_THINK)
+
+@dp.message(F.text == "🏰 В Королевство!")
+async def kingdom_button(message: Message):
+    response = random.choice(kingdom_responses)
+    response = response.replace("@user", message.from_user.first_name)
+    await message.answer(response, parse_mode="Markdown")
+    await message.answer_sticker(STICKER_DRAMA)
 
 @dp.message(Command("spin"))
 async def spin_wheel(message: Message):
@@ -59,54 +111,48 @@ async def spin_wheel(message: Message):
         user_scores[user_id] = 0
 
     sector = random.choice(['ХАОС!', 'ПРИЗ', 'ПРОКЛЯТИЕ', 'ТЕАТР', 'ДЖЕКПОТ'])
-    comment = "🎭 Ты выбрал смерть... или печеньку?"
 
     if sector == 'ХАОС!':
         await message.answer(f"🎭 *ВЫПАЛО:* {sector}\n\n{random.choice(jokes)}", parse_mode="Markdown")
     elif sector == 'ПРИЗ':
         user_scores[user_id] += 10
-        await message.answer(f"🎭 *ВЫПАЛО:* {sector}\n\n✨ Ты получил +10 очков! ✨\nТвой счёт: {user_scores[user_id]}", parse_mode="Markdown")
+        await message.answer(f"🎭 *ВЫПАЛО:* {sector}\n\n✨ +10 очков! Счёт: {user_scores[user_id]}", parse_mode="Markdown")
     elif sector == 'ПРОКЛЯТИЕ':
         user_scores[user_id] -= 5
-        await message.answer(f"🎭 *ВЫПАЛО:* {sector}\n\n💀 Ты потерял 5 очков... 💀\nТвой счёт: {user_scores[user_id]}", parse_mode="Markdown")
+        await message.answer(f"🎭 *ВЫПАЛО:* {sector}\n\n💀 -5 очков! Счёт: {user_scores[user_id]}", parse_mode="Markdown")
     elif sector == 'ТЕАТР':
-        await message.answer(f"🎭 *ВЫПАЛО:* {sector}\n\n🎭 Твоё задание: расскажи Шамилю, почему ты всё ещё здесь?", parse_mode="Markdown")
+        await message.answer(f"🎭 *ВЫПАЛО:* {sector}\n\n🎭 Расскажи Шамилю, почему ты всё ещё здесь?", parse_mode="Markdown")
     elif sector == 'ДЖЕКПОТ':
         user_scores[user_id] += 50
         await message.answer_sticker(STICKER_LAUGH)
-        await message.answer(f"🎭 *ВЫПАЛО ДЖЕКПОТ!*\n\n🌟 ТЫ ПОЛУЧИЛ 50 ОЧКОВ, МАРИОНЕТКА! 🌟\nТвой счёт: {user_scores[user_id]}", parse_mode="Markdown")
+        await message.answer(f"🎭 *ДЖЕКПОТ!*\n\n🌟 +50 очков! Счёт: {user_scores[user_id]}", parse_mode="Markdown")
 
-    await message.answer(comment)
     await message.answer_sticker(STICKER_THINK)
 
 @dp.message(Command("top"))
 async def show_top(message: Message):
     if not user_scores:
-        await message.answer("🎭 *Никто ещё не крутил колесо!* Будь первым, марионетка! /spin", parse_mode="Markdown")
+        await message.answer("🎭 Никто ещё не крутил колесо! /spin", parse_mode="Markdown")
         return
-
     sorted_scores = sorted(user_scores.items(), key=lambda x: x[1], reverse=True)
     top_text = "🏆 *ТОП МАРИОНЕТОК* 🏆\n\n"
-    for idx, (user_id, score) in enumerate(sorted_scores[:10], start=1):
+    for idx, (user_id, score) in enumerate(sorted_scores[:5], 1):
         user = await bot.get_chat(user_id)
-        name = user.first_name
-        top_text += f"{idx}. {name} — {score} очков\n"
-
+        top_text += f"{idx}. {user.first_name} — {score} очков\n"
     await message.answer(top_text, parse_mode="Markdown")
-    await message.answer_sticker(STICKER_DRAMA)
 
-# Следим за ругательствами (обновлённый способ)
+# ========== ФИЛЬТРАЦИЯ МАТА ==========
 BAD_WORDS = {'сука', 'бля', 'пидор', 'дебил', 'блят', 'блять', 'пошёл', 'ублюдок'}
 
 @dp.message()
-async def handle_bad_words(message: Message):
-    text = message.text.lower()
-    if any(word in text for word in BAD_WORDS):
+async def filter_bad_words(message: Message):
+    if any(word in message.text.lower() for word in BAD_WORDS):
         await message.answer("🎭 Ай-яй-яй, я не буду это слушать!")
         await message.answer_sticker(STICKER_ANGRY)
 
+# ========== ЗАПУСК ==========
 async def main():
-    print("🎭 Шамиль запущен и крутит Колесо Фортуны...")
+    print("🎭 Шамиль запущен. Театр открыт!")
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
