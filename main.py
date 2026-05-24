@@ -4,14 +4,13 @@ from aiogram import Bot, Dispatcher, F
 from aiogram.filters import Command
 from aiogram.types import Message
 
-# Если бот все равно присылает ID после замены этого кода — 
-# значит, надо нажать Revoke Token в @BotFather и вставить сюда новый!
+# Твой токен
 TOKEN = '8684676356:AAFn3L9uhbGqHymJzanCFmTvDnBVWZKklLQ'
 
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
 
-# ID стикеров (только для отправки ботом)
+# ID твоих стикеров
 STICKER_ANGRY = 'CAACAgIAAyEGAATJg9QWAAI9S2oQn5yUP74zmVr30B19LfNJQ5BOAAI7mAACnMCJSJCUxis28mu_OwQ'
 STICKER_LAUGH = 'CAACAgIAAyEFAATg5w4fAAPVahCKEgqm6gMnTmhlbkJ7WPLWFrEAAianAAI6pIBIsOEtVY3_4tA7BA'
 STICKER_THINK = 'CAACAgIAAyEFAATg5w4fAAIBEmoQjoFARfSHEhf5BhIvBpK1C3P0AALFqAACdOR4SBlpuri97s0XOwQ'
@@ -45,7 +44,7 @@ async def handle_bad_words(message: Message):
     await message.answer(random.choice(insult_replies))
     await message.answer_sticker(STICKER_ANGRY)
 
-# ЗАПУСК
+# Запуск
 async def main():
     await dp.start_polling(bot)
 
