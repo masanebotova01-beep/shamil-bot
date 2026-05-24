@@ -20,6 +20,8 @@ jokes = ["🎭 ЗНАЕШЬ КАКОЕ САМОЕ ЛОХОНУТОЕ СОЗДА�
 insult_replies = ["🎭 НУ И НУ! ПОВЕРЬ, ОНИ ТЕБЕ НИЧЕМ НЕ ПОМОГУТ.", "🎭 Ублюдок? Какое низкое слово."]
 magic_answers = ["Да.", "Нет.", "Возможно."]
 
+# --- КОМАНДЫ ---
+
 @dp.message(Command("start"))
 async def start(message: Message):
     await message.answer("🎭 Шамиль (Шадоу Милк) НА СЦЕНЕ. ГОТОВЫ ЛИ ВЫ К ДРАМЕ?")
@@ -29,6 +31,8 @@ async def start(message: Message):
 async def joke(message: Message):
     await message.answer(random.choice(jokes))
     await message.answer_sticker(STICKER_LAUGH)
+
+# --- РЕАКЦИИ ---
 
 @dp.message(F.text.lower().contains("шамиль") & F.text.contains("?"))
 async def handle_shamil_question(message: Message):
@@ -40,6 +44,7 @@ async def handle_bad_words(message: Message):
     await message.answer(random.choice(insult_replies))
     await message.answer_sticker(STICKER_ANGRY)
 
+# --- ЗАПУСК ---
 async def main():
     await dp.start_polling(bot)
 
