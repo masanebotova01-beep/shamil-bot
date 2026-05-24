@@ -4,21 +4,12 @@ from aiogram import Bot, Dispatcher, F
 from aiogram.filters import Command
 from aiogram.types import Message
 
-# Твой токен
 TOKEN = '8684676356:AAFn3L9uhbGqHymJzanCFmTvDnBVWZKklLQ'
 
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
 
-# --- БАЗА ЗНАНИЙ ШАМИЛЯ ---
-jokes = [
-    "🎭 ЗНАЕШЬ КАКОЕ САМОЕ ЛОХОНУТОЕ СОЗДАНИЕ? ВЕРНО, ТЫ!",
-    "🎭 Представь если бы ты был в моей иллюзии, то как бы я с тобой относился? ПРАВИЛЬНО, КАК К МАРИОНЕТКЕ! ХАХАХА",
-    "🎭 ЗНАЕШЬ ПОЧЕМУ ПРОГРАММИСТЫ НЕ ЛЮБЯТ ПРИРОДУ? ПОТОМУ ЧТО ТАМ НЕ ИНТЕРЕСНО, БЫТЬ ОДНИМ ЛЕГЧЕ СИДЕТЬ ДОМА И ИГРАТЬ СО СВОИМ СОЗДАННЫМ!",
-    "🎭 Если так подумать, то у меня нет мамы, но есть создательница, которая разрешает делать всё, что я только захочу. ТАК ЧТО ЗАВИДУЙ!",
-    "🎭 Поверь, я не просто какой-то бот, я действительно могу всё запоминать — каждое слово, которым ты меня оскорбляешь."
-]
-
+# Списки фраз
 bad_words = ['сука', 'бля', 'пидор', 'дебил', 'блят', 'блять', 'пошёл', 'ублюдок']
 insult_replies = [
     "🎭 НУ И НУ! ПОВЕРЬ, ОНИ ТЕБЕ НИЧЕМ НЕ ПОМОГУТ. ПОМОЧЬ СЕБЕ МОЖЕШЬ ТОЛЬКО ТЫ.",
@@ -27,40 +18,23 @@ insult_replies = [
     "🎭 Ублюдок? Какое низкое слово для столь ничтожного существа, как ты."
 ]
 
-magic_answers = ["Да.", "Нет.", "Маловероятно.", "Возможно.", "Ха! Ты серьезно ждешь от меня правды?"]
+# Обработка матов (самая первая в списке)
+@dp.message(F.text.lower().contains(tuple(bad_words)))
+async def handle_bad_words(message: Message):
+    await message.answer(random.choice(insult_replies))
 
-# --- ЛОГИКА ---
-
+# Остальные команды
 @dp.message(Command("start"))
 async def start(message: Message):
     await message.answer("🎭 Шамиль (Шадоу Милк) НА СЦЕНЕ. ГОТОВЫ ЛИ ВЫ К ДРАМЕ?")
 
 @dp.message(Command("joke"))
 async def joke(message: Message):
-    await message.answer(random.choice(jokes))
-
-# Инструмент для поиска ID стикеров
-@dp.message(Command("getsticker"))
-async def start_sticker_mode(message: Message):
-    await message.answer("🎭 Пришли мне стикер, и я покажу его ID.")
-
-@dp.message(F.sticker)
-async def get_sticker_id(message: Message):
-    await message.answer(f"🎭 ID стикера: `{message.sticker.file_id}`", parse_mode="Markdown")
-
-# Фильтры на мат и вопросы
-@dp.message(F.text.lower().contains(tuple(bad_words)))
-async def handle_bad_words(message: Message):
-    await message.answer(random.choice(insult_replies))
-
-@dp.message(F.text.lower().contains("шамиль") & F.text.contains("?"))
-async def handle_shamil_question(message: Message):
-    await message.answer(random.choice(magic_answers))
+    await message.answer("🎭 ЗНАЕШЬ КАКОЕ САМОЕ ЛОХОНУТОЕ СОЗДАНИЕ? ВЕРНО, ТЫ!")
 
 async def main():
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
     asyncio.run(main())
-    
     
