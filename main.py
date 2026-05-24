@@ -4,13 +4,12 @@ from aiogram import Bot, Dispatcher, F
 from aiogram.filters import Command
 from aiogram.types import Message
 
-# Твой актуальный токен
 TOKEN = '8684676356:AAFn3L9uhbGqHymJzanCFmTvDnBVWZKklLQ'
 
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
 
-# Шутки
+# Твои списки
 jokes = [
     "🎭 ЗНАЕШЬ КАКОЕ САМОЕ ЛОХОНУТОЕ СОЗДАНИЕ? ВЕРНО, ТЫ!",
     "🎭 Представь если бы ты был в моей иллюзии, то как бы я с тобой относился? ПРАВИЛЬНО, КАК К МАРИОНЕТКЕ! ХАХАХА",
@@ -19,10 +18,6 @@ jokes = [
     "🎭 Поверь, я не просто какой-то бот, я действительно могу всё запоминать — каждое слово, которым ты меня оскорбляешь."
 ]
 
-# Ответы на вопросы (Шамиль + ?)
-magic_answers = ["Да.", "Нет.", "Маловероятно.", "Возможно.", "Ха! Ты серьезно ждешь от меня правды?"]
-
-# Маты (дополнила список)
 bad_words = ['сука', 'бля', 'пидор', 'дебил', 'блят', 'блять', 'пошёл', 'ублюдок']
 insult_replies = [
     "🎭 НУ И НУ! ПОВЕРЬ, ОНИ ТЕБЕ НИЧЕМ НЕ ПОМОГУТ. ПОМОЧЬ СЕБЕ МОЖЕШЬ ТОЛЬКО ТЫ.",
@@ -30,6 +25,10 @@ insult_replies = [
     "🎭 Ну и ну, как не стыдно! ДАЖЕ Я ТАК НЕ ДЕЛАЮ. Ведь это противно.",
     "🎭 Ублюдок? Какое низкое слово для столь ничтожного существа, как ты."
 ]
+
+magic_answers = ["Да.", "Нет.", "Маловероятно.", "Возможно.", "Ха! Ты серьезно ждешь от меня правды?"]
+
+# --- ОБРАБОТЧИКИ ---
 
 @dp.message(Command("start"))
 async def start(message: Message):
@@ -39,12 +38,12 @@ async def start(message: Message):
 async def joke(message: Message):
     await message.answer(random.choice(jokes))
 
-# Реакция на мат
+# Реакция на мат (стоит ПЕРЕД остальными текстовыми сообщениями)
 @dp.message(F.text.lower().contains(tuple(bad_words)))
 async def handle_bad_words(message: Message):
     await message.answer(random.choice(insult_replies))
 
-# Реакция на имя и вопрос
+# Реакция на вопрос с именем
 @dp.message(F.text.lower().contains("шамиль") & F.text.contains("?"))
 async def handle_shamil_question(message: Message):
     await message.answer(random.choice(magic_answers))
@@ -54,3 +53,4 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+    
