@@ -5,7 +5,7 @@ from aiogram.filters import Command
 from aiogram.types import Message, ReplyKeyboardMarkup, KeyboardButton
 
 # ========== ТОКЕН ==========
-TOKEN = '8684676356:AAFn3L9uhbGqHymJzanCFmTvDnBVWZKklLQ'
+TOKEN = "8684676356:AAFn3L9uhbGqHymJzanCFmTvDnBVWZKklLQ"
 
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
@@ -380,20 +380,4 @@ async def auto_react(message: Message):
         await message.answer("🎭 *Шамиль:* ХА-ХА! Твоя благодарность — моё топливо!", parse_mode="Markdown")
         return
     
-    if any(word in text_lower for # ... весь остальной код ...
-
-# ========== КОМАНДА /JOKE ==========
-@dp.message(Command("joke"))
-async def joke_command(message: Message):
-    joke = random.choice(SHAMIL_JOKES)
-    joke = joke.replace("@user", message.from_user.first_name)
-    await message.answer(joke, parse_mode="Markdown")
-    await message.answer_sticker(STICKER_LAUGH)
-
-# ========== ЗАПУСК ==========
-async def main():
-    print("🎭 Шамиль запущен. Театр открыт!")
-    await dp.start_polling(bot)
-
-if __name__ == "__main__":
-    asyncio.run(main())
+    if any(word in text_lower for 
