@@ -246,8 +246,8 @@ async def story_command(message: Message):
         story = random.choice(STORY_LIST)
         await message.answer(story, parse_mode="Markdown")
 
-# ========== АВТОМАТИЧЕСКИЕ РЕАКЦИИ ШАМИЛЯ ==========
-ALL_BAD_WORDS = {'сука', 'бля', 'пидор', 'дебил', 'блят', 'блять', 'пошёл', 'ублюдок', 'мать', 'тварь', 'сучка', 'гей', 'шлюха', 'нахуя', 'нахуй'}
+# ========== АВТОМАТИЧЕСКИЕ РЕАКЦИИ ==========
+BAD_WORDS = {'сука', 'бля', 'пидор', 'дебил', 'блят', 'блять', 'пошёл', 'ублюдок', 'мать', 'тварь', 'сучка', 'гей', 'шлюха', 'нахуя', 'нахуй'}
 GREETINGS = {'привет', 'здарова', 'хай', 'ку', 'здравствуй', 'салют', 'hello', 'доброе утро', 'добрый вечер', 'добрый день'}
 THANKS = {'спасибо', 'благодарю', 'мерси', 'благодарствую', 'thanks'}
 SAD_WORDS = {'грустно', 'печально', 'устал', 'плохое настроение', 'депрессия', 'тоска', 'обидно'}
@@ -257,39 +257,33 @@ SHAMIL_QA = [
 ]
 
 @dp.message()
-async def auto_shamil_react(message: Message):
-    # Не трогаем команды
+async def auto_react(message: Message):
     if message.text.startswith("/"):
         return
     
     text_lower = message.text.lower()
     
-    # 1. Реакция на мат
-    if any(word in text_lower for word in ALL_BAD_WORDS):
+    if any(word in text_lower for word in BAD_WORDS):
         await message.answer("🎭 *Ай-яй-яй, я не буду это слушать!*", parse_mode="Markdown")
         await message.answer_sticker(STICKER_ANGRY)
         return
     
-    # 2. Реакция на вопросы к Шамилю (имя + ?)
     if "шамиль" in text_lower and message.text.strip().endswith("?"):
         answer = random.choice(SHAMIL_QA)
         await asyncio.sleep(0.3)
         await message.answer(f"🎭 *Шамиль:* {answer}", parse_mode="Markdown")
         return
     
-    # 3. Реакция на приветствия
     if any(greet in text_lower.split() for greet in GREETINGS):
         await asyncio.sleep(0.3)
         await message.answer("🎭 *Шамиль:* Привет, марионетка! Жми на кнопки!", parse_mode="Markdown")
         return
     
-    # 4. Реакция на благодарности
     if any(word in text_lower for word in THANKS):
         await asyncio.sleep(0.3)
         await message.answer("🎭 *Шамиль:* ХА-ХА! Твоя благодарность — моё топливо!", parse_mode="Markdown")
         return
     
-    # 5. Реакция на плохое настроение
     if any(word in text_lower for word in SAD_WORDS):
         await asyncio.sleep(0.3)
         await message.answer("🎭 *Шамиль:* Сцена — лучшее лекарство! Попробуй /spin или /story!", parse_mode="Markdown")
