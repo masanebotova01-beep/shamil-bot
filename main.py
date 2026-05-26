@@ -81,7 +81,7 @@ SHAMIL_JOKES = [
     "🎭 Шамиль объявил конец света, но это был просто конец урока. ХА-ХА-ХА, СНОВА В ШКОЛУ, МОЙ ДРУГ!"
 ]
 
-# ========== 20 ВОПРОСОВ ДЛЯ /GAME1 ==========
+# ========== 20 ВОПРОСОВ ДЛЯ ВИКТОРИНЫ ==========
 GAME1_QUESTIONS = [
     {"text": "🎭 Кто главный в театре?", "options": ["Шамиль", "Ваниль", "Кенди Эпл", "Теневой Виноград"], "correct": "Шамиль"},
     {"text": "🧽 Что делает Ваниль?", "options": ["Моет полы", "Танцует", "Спит", "Играет на сцене"], "correct": "Моет полы"},
@@ -174,6 +174,7 @@ async def spin_wheel(message: Message):
         await message.answer(f"🌟 ДЖЕКПОТ! +50 очков! Счёт: {user_scores[user_id]}")
     else:
         await message.answer(random.choice(jokes))
+    await message.answer_sticker(STICKER_THINK)
 
 @dp.message(Command("top"))
 async def show_top(message: Message):
@@ -200,7 +201,7 @@ async def joke_command(message: Message):
     await message.answer(joke, parse_mode="Markdown")
     await message.answer_sticker(STICKER_LAUGH)
 
-# ========== ОБРАБОТКА ОТВЕТОВ ВИКТОРИНЫ ==========
+# ========== ОТВЕТЫ НА ВОПРОСЫ ВИКТОРИНЫ ==========
 @dp.message()
 async def game1_answer(message: Message):
     user_id = message.from_user.id
@@ -221,33 +222,47 @@ async def game1_answer(message: Message):
             break
     del active_quiz[user_id]
 
-# ========== АВТОРЕАКЦИИ ==========
+# ========== АВТОРЕАКЦИИ (ВКЛЮЧАЯ "ШАМИЛЬ, ...?") ==========
 BAD_WORDS = {'сука', 'бля', 'пидор', 'дебил', 'ублюдок', 'шлюха', 'нахуй'}
 GREETINGS = {'привет', 'здарова', 'хай', 'ку', 'здравствуй', 'салют', 'hello'}
 THANKS = {'спасибо', 'благодарю', 'мерси', 'thanks'}
 SAD_WORDS = {'грустно', 'печально', 'устал', 'обидно', 'тоска'}
-SHAMIL_QA = ["Да.", "Нет, лох.", "Возможно, но тебе не понять.", "Маловероятно.", "Не знаю, ублюдок.", "Спроси у своей тени.", "50 на 50."]
+SHAMIL_QA = [
+    "Да.", "Нет, лох.", "Возможно, но тебе не понять.", "Маловероятно.",
+    "Не знаю, ублюдок.", "Спроси у своей тени.", "50 на 50. Как и твои шансы понять меня."
+]
 
 @dp.message()
 async def auto_react(message: Message):
     if message.text.startswith("/"):
         return
     txt = message.text.lower()
+    
     if any(w in txt for w in BAD_WORDS):
         await message.answer("🎭 Ай-яй-яй, не выражайся!")
         await message.answer_sticker(STICKER_ANGRY)
-    elif "шамиль" in txt and message.text.strip().endswith("?"):
-        await asyncio.sleep(0.5)
-        await message.answer(f"🎭 *Шамиль:* {random.choice(SHAMIL_QA)}", parse_mode="Markdown")
-    elif any(w in txt.split() for w in GREETINGS):
+        return
+    
+    if "шамиль" in txt and message.text.strip().endswith("?"):
+        answer = random.choice(SHAMIL_QA)
+        await asyncio.sleep(0.3)
+        await message.answer(f"🎭 *Шамиль:* {answer}", parse_mode="Markdown")
+        return
+    
+    if any(w in txt.split() for w in GREETINGS):
         await asyncio.sleep(0.3)
         await message.answer("🎭 *Шамиль:* Привет, марионетка! Жми на кнопки!", parse_mode="Markdown")
-    elif any(w in txt for w in THANKS):
+        return
+    
+    if any(w in txt for w in THANKS):
         await asyncio.sleep(0.3)
         await message.answer("🎭 *Шамиль:* ХА-ХА! Твоя благодарность — моё топливо!", parse_mode="Markdown")
-    elif any(w in txt for w in SAD_WORDS):
+        return
+    
+    if any(w in txt for w in SAD_WORDS):
         await asyncio.sleep(0.3)
         await message.answer("🎭 *Шамиль:* Сцена — лучшее лекарство! /spin или /story!", parse_mode="Markdown")
+        return
 
 # ========== ЗАПУСК ==========
 async def main():
