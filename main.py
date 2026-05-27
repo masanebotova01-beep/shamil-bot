@@ -81,7 +81,7 @@ SHAMIL_JOKES = [
     "🎭 Шамиль объявил конец света, но это был просто конец урока. ХА-ХА-ХА, СНОВА В ШКОЛУ, МОЙ ДРУГ!"
 ]
 
-# ========== 20 ВОПРОСОВ ДЛЯ ВИКТОРИНЫ ==========
+# ========== 20 ВОПРОСОВ ДЛЯ /GAME1 ==========
 GAME1_QUESTIONS = [
     {"text": "🎭 Кто главный в театре?", "options": ["Шамиль", "Ваниль", "Кенди Эпл", "Теневой Виноград"], "correct": "Шамиль"},
     {"text": "🧽 Что делает Ваниль?", "options": ["Моет полы", "Танцует", "Спит", "Играет на сцене"], "correct": "Моет полы"},
@@ -106,6 +106,16 @@ GAME1_QUESTIONS = [
 ]
 
 active_quiz = {}
+
+# ========== ИСПЫТАНИЯ ДЛЯ /GAME3 ==========
+GAME3_TRIALS = [
+    {"type": "win", "reward": 15, "text": "🎭 Удача улыбнулась тебе! Ты выиграл 15 очков! 🎉"},
+    {"type": "lose", "loss": 5, "text": "🎭 О нет! Теневой Виноград украл твои очки. -5 очков."},
+    {"type": "guess", "reward": 20, "text": "🎭 Шамиль загадал число от 1 до 5. Угадаешь — получишь 20 очков. Напиши число в ответ."},
+    {"type": "compliment", "reward": 15, "text": "🎭 Напиши комплимент Шамилю. Лучший получит +15 очков (Шамиль выбирает сам)."}
+]
+
+active_trials = {}
 
 # ========== ИСТОРИИ ==========
 STORY_LIST = [
@@ -142,7 +152,14 @@ async def boredom_button(message: Message):
 
 @dp.message(F.text == "🏰 В Королевство!")
 async def kingdom_button(message: Message):
-    await message.answer("🏰 *Добро пожаловать в Королевство!*\n\n/game1 — Викторина\n/spin — Колесо Фортуны\n/story — История от Шамиля", parse_mode="Markdown")
+    await message.answer(
+        "🏰 *Добро пожаловать в Королевство!*\n\n"
+        "/game1 — Викторина (20 вопросов, +10 очков)\n"
+        "/game3 — Театральный хаос (испытания на удачу)\n"
+        "/spin — Колесо Фортуны\n"
+        "/story — История от Шамиля",
+        parse_mode="Markdown"
+    )
     await message.answer_sticker(STICKER_DRAMA)
 
 @dp.message(Command("kingdom"))
@@ -156,6 +173,27 @@ async def game1_start(message: Message):
     active_quiz[user_id] = q["correct"]
     options = "\n".join([f"{i+1}. {opt}" for i, opt in enumerate(q["options"])])
     await message.answer(f"🎭 *ВИКТОРИНА!*\n\n{q['text']}\n\n{options}\n\nОтветь числом (1-4).", parse_mode="Markdown")
+
+@dp.message(Command("game3"))
+async def game3_start(message: Message):
+    user_id = message.from_user.id
+    trial = random.choice(GAME3_TRIALS)
+    active_trials[user_id] = trial
+    
+    if trial["type"] == "win":
+        user_scores[user_id] = user_scores.get(user_id, 0) + trial["reward"]
+        await message.answer(f"🎭 {trial['text']}\n✨ Твой счёт: {user_scores[user_id]} очков")
+        await message.answer_sticker(STICKER_LAUGH)
+        del active_trials[user_id]
+    
+    elif trial["type"] == "lose":
+        user_scores[user_id] = user_scores.get(user_id, 0) - trial["loss"]
+        await message.answer(f"🎭 {trial['text']}\n💀 Твой счёт: {user_scores[user_id]} очков")
+        await message.answer_sticker(STICKER_ANGRY)
+        del active_trials[user_id]
+    
+    else:
+        await message.answer(f"🎭 {trial['text']}")
 
 @dp.message(Command("spin"))
 async def spin_wheel(message: Message):
@@ -201,28 +239,54 @@ async def joke_command(message: Message):
     await message.answer(joke, parse_mode="Markdown")
     await message.answer_sticker(STICKER_LAUGH)
 
-# ========== ОТВЕТЫ НА ВОПРОСЫ ВИКТОРИНЫ ==========
+# ========== ОБРАБОТКА ОТВЕТОВ ==========
 @dp.message()
-async def game1_answer(message: Message):
+async def handle_answers(message: Message):
     user_id = message.from_user.id
-    if user_id not in active_quiz or not message.text.isdigit():
+    text = message.text.strip()
+    
+    # Ответ на викторину /game1
+    if user_id in active_quiz:
+        correct = active_quiz[user_id]
+        if text.isdigit() and 1 <= int(text) <= 4:
+            choice_index = int(text) - 1
+            for q in GAME1_QUESTIONS:
+                if q["correct"] == correct:
+                    if choice_index < len(q["options"]) and q["options"][choice_index] == correct:
+                        user_scores[user_id] = user_scores.get(user_id, 0) + 10
+                        await message.answer(f"✅ ПРАВИЛЬНО! +10 очков! Счёт: {user_scores[user_id]}")
+                        await message.answer_sticker(STICKER_LAUGH)
+                    else:
+                        await message.answer(f"❌ НЕПРАВИЛЬНО! Правильный ответ: {correct}. Попробуй /game1 снова")
+                        await message.answer_sticker(STICKER_ANGRY)
+                    break
+            del active_quiz[user_id]
         return
-    correct = active_quiz[user_id]
-    if int(message.text) < 1 or int(message.text) > 4:
-        return
-    for q in GAME1_QUESTIONS:
-        if q["correct"] == correct:
-            if q["options"][int(message.text)-1] == correct:
-                user_scores[user_id] = user_scores.get(user_id, 0) + 10
-                await message.answer(f"✅ ПРАВИЛЬНО! +10 очков! Счёт: {user_scores[user_id]}")
+    
+    # Ответ на испытание /game3
+    if user_id in active_trials:
+        trial = active_trials[user_id]
+        
+        if trial["type"] == "guess" and text.isdigit():
+            secret = random.randint(1, 5)
+            if int(text) == secret:
+                user_scores[user_id] = user_scores.get(user_id, 0) + trial["reward"]
+                await message.answer(f"🎭 Ты угадал! Это было число {secret}. +{trial['reward']} очков! Счёт: {user_scores[user_id]}")
                 await message.answer_sticker(STICKER_LAUGH)
             else:
-                await message.answer(f"❌ НЕПРАВИЛЬНО! Правильный ответ: {correct}. Попробуй /game1 снова")
-                await message.answer_sticker(STICKER_ANGRY)
-            break
-    del active_quiz[user_id]
+                await message.answer(f"🎭 Не угадал! Я загадал {secret}. Попробуй ещё раз /game3")
+            del active_trials[user_id]
+        
+        elif trial["type"] == "compliment":
+            if "Шамиль" in text or "шамиль" in text:
+                user_scores[user_id] = user_scores.get(user_id, 0) + trial["reward"]
+                await message.answer(f"🎭 ХА-ХА! Достойный комплимент! +{trial['reward']} очков! Счёт: {user_scores[user_id]}")
+                await message.answer_sticker(STICKER_LAUGH)
+            else:
+                await message.answer("🎭 Комплимент должен быть Шамилю! Попробуй ещё раз /game3")
+            del active_trials[user_id]
 
-# ========== АВТОРЕАКЦИИ (ВКЛЮЧАЯ "ШАМИЛЬ, ...?") ==========
+# ========== АВТОРЕАКЦИИ ==========
 BAD_WORDS = {'сука', 'бля', 'пидор', 'дебил', 'ублюдок', 'шлюха', 'нахуй'}
 GREETINGS = {'привет', 'здарова', 'хай', 'ку', 'здравствуй', 'салют', 'hello'}
 THANKS = {'спасибо', 'благодарю', 'мерси', 'thanks'}
